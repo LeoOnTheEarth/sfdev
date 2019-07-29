@@ -31,6 +31,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
     )
 
     ECHO.
+    ECHO.
     docker-compose -f docker-compose.yml ps
 
     GOTO :END
@@ -45,6 +46,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
     )
     
     ECHO.
+    ECHO.
     docker-compose -f docker-compose.yml ps
 
     GOTO :END
@@ -58,16 +60,24 @@ SETLOCAL ENABLEDELAYEDEXPANSION
         GOTO loop
       )
 
+      ECHO.
+      ECHO.
+
       docker-compose -f docker-compose.yml down
+      ECHO.
       docker system prune -f
+      ECHO.
       docker volume prune -f
+      ECHO.
       docker system df
+      ECHO.
 
       docker-compose -f docker-compose.yml up -d
     ) ELSE (
       docker-compose -f docker-compose.yml restart !SERVICES!
     )
     
+    ECHO.
     ECHO.
     docker-compose -f docker-compose.yml ps
 
