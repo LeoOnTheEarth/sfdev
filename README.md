@@ -11,18 +11,34 @@ PHP Develop Environment with WSL and Docker
 
 ## Installation
 
-1. Clone the [`sfdev`](https://github.com/LeoOnTheEarth/sfdev) into `C:/sfdev/`
-2. Enter WSL mode  
+First, open Windows Command Prompt (a.k.a. `cmd.exe`)
 
-   ```bash
-   $ wsl.exe
-   ```
+1. Clone [`sfdev`](https://github.com/LeoOnTheEarth/sfdev) into `C:\sfdev`  
 
-3. Execute `install.sh` script  
+    ```bash
+    C:\> cd C:\
+    C:\> git clone https://github.com/LeoOnTheEarth/sfdev
+    ```
+
+2. Enter WSL mode, and install Ubuntu packages  
+
+    ```bash
+    C:\> wsl.exe
+    ```
+
+    Then, execute `install.sh` script  
    
-   ```bash
-   $ /mnt/c/sfdev/wsl/install.sh
-   ```
+    ```bash
+    $ /mnt/c/sfdev/wsl/install.sh
+    ```
 
-4. Add `C:/sfdev/bin` into your Windows `$PATH` environment. 
+4. Add `C:\sfdev\bin` into your Windows `$PATH` environment.
 
+5. Execute command to start all services  
+
+    ```bash
+    C:\> C:\sfdev\bin\sfdev-start-all-services.bat
+
+    # Or Just execute sfdev-start-all-services
+    C:\> sfdev-start-all-services
+    ```
