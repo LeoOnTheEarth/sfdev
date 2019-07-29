@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" ; pwd -P)"
 SCRIPT_NAME=`basename "$0"`
-ALL_SERVICES=("cron" "php5.6-fpm" "php7.2-fpm" "nginx")
+ALL_SERVICES=("cron" "ssh" "php5.6-fpm" "php7.2-fpm" "nginx")
 ACTION="none"
 SERVICE="all"
 
