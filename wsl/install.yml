@@ -1,0 +1,447 @@
+---
+- name: Add repositories and update packages
+  hosts: localhost
+  become: yes
+  vars:
+    codename: bionic
+  tasks:
+    - name: Add Nginx Apt signing key
+      apt_key:
+        url: https://nginx.org/keys/nginx_signing.key
+        state: present
+
+    - name: Add Nginx repositories
+      apt_repository:
+        repo: '{{ item }}'
+        state: present
+      with_items:
+        - 'deb https://nginx.org/packages/ubuntu/ {{ codename }} nginx'
+        - 'deb-src https://nginx.org/packages/ubuntu/ {{ codename }} nginx'
+
+    - name: Add Blackfire Apt signing key
+      apt_key:
+        url: https://packages.blackfire.io/gpg.key
+        state: present
+
+    - name: Add Blackfire repository
+      apt_repository:
+        repo: deb http://packages.blackfire.io/debian any main
+        state: present
+
+    - name: Add ppa:ondrej/php repository
+      apt_repository:
+        repo: ppa:ondrej/php
+        state: present
+
+    - name: Add Microsoft APT signing key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Microsoft package resource list for APT
+      get_url:
+        url: https://packages.microsoft.com/config/ubuntu/18.04/prod.list
+        dest: /etc/apt/sources.list.d/mssql-release.list
+        force: yes
+      changed_when: False
+
+    - name: Do apt-get update
+      apt:
+        update_cache: yes
+      changed_when: False
+
+    - name: Update packages
+      apt:
+        upgrade: dist
+        state: latest
+
+
+- name: Install basic packages
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install basic packages
+      apt:
+        name: '{{ packages }}'
+        state: latest
+      vars:
+        packages:
+          - dos2unix
+          - wget
+          - mysql-client
+          - unzip
+          - libncurses5-dev
+    
+    - name: Install pygments
+      pip:
+        name: pygments
+
+
+- name: Install PHP and extensions
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install PHP 5.6
+      apt:
+        name: '{{ packages }}'
+        state: latest
+      vars:
+        packages:
+          - php5.6
+          - php5.6-apcu
+          - php5.6-bcmath
+          - php5.6-curl
+          - php5.6-dev
+          - php5.6-enchant
+          - php5.6-fpm
+          - php5.6-gd
+          - php5.6-gmp
+          - php5.6-imap
+          - php5.6-interbase
+          - php5.6-intl
+          - php5.6-ldap
+          - php5.6-mbstring
+          - php5.6-mcrypt
+          - php5.6-memcache
+          - php5.6-memcached
+          - php5.6-mysql
+          - php5.6-odbc
+          - php5.6-pgsql
+          - php5.6-redis
+          - php5.6-snmp
+          - php5.6-soap
+          - php5.6-tidy
+          - php5.6-xdebug
+          - php5.6-xml
+          - php5.6-zip
+
+    - name: Install PHP 7.2
+      apt:
+        name: '{{ packages }}'
+        state: latest
+      vars:
+        packages:
+          - php7.2
+          - php7.2-apcu
+          - php7.2-bcmath
+          - php7.2-curl
+          - php7.2-dev
+          - php7.2-enchant
+          - php7.2-fpm
+          - php7.2-gd
+          - php7.2-gmp
+          - php7.2-imap
+          - php7.2-interbase
+          - php7.2-intl
+          - php7.2-ldap
+          - php7.2-mbstring
+          - php7.2-memcache
+          - php7.2-memcached
+          - php7.2-mysql
+          - php7.2-odbc
+          - php7.2-pgsql
+          - php7.2-redis
+          - php7.2-snmp
+          - php7.2-soap
+          - php7.2-tidy
+          - php7.2-xdebug
+          - php7.2-xml
+          - php7.2-zip
+
+    - name: Set PHP 7.2 as default php version
+      alternatives:
+        name: php
+        path: /usr/bin/php7.2
+
+    - name: Set PHP 5.6 binary alias
+      file:
+        src: /usr/bin/php5.6
+        dest: /usr/local/bin/php56
+        state: link
+
+    - name: Set PHP 7.2 binary alias
+      file:
+        src: /usr/bin/php7.2
+        dest: /usr/local/bin/php72
+        state: link
+
+    - name: Install unixodbc-dev package
+      apt:
+        name: unixodbc-dev
+        state: latest
+
+    - name: Install sqlsrv extension
+      pear:
+        name: pecl/sqlsrv
+        state: present
+
+    - name: Install pdo_sqlsrv extension
+      pear:
+        name: pecl/pdo_sqlsrv
+        state: present
+
+    - name: Enable sqlsrv extension
+      copy:
+        content: 'extension=sqlsrv.so'
+        dest: /etc/php/7.2/mods-available/sqlsrv.ini
+
+    - name: Enable pdo_sqlsrv extension
+      copy:
+        content: 'extension=pdo_sqlsrv.so'
+        dest: /etc/php/7.2/mods-available/pdo_sqlsrv.ini
+
+    - name: Add ini file links for sqlsrv extension
+      file:
+        src: /etc/php/7.2/mods-available/sqlsrv.ini
+        dest: '{{ item }}'
+        state: link
+      with_items:
+        - /etc/php/7.2/cli/conf.d/20-sqlsrv.ini
+        - /etc/php/7.2/fpm/conf.d/20-sqlsrv.ini
+
+    - name: Add ini file links for pdo_sqlsrv extension
+      file:
+        src: /etc/php/7.2/mods-available/pdo_sqlsrv.ini
+        dest: '{{ item }}'
+        state: link
+      with_items:
+        - /etc/php/7.2/cli/conf.d/30-pdo_sqlsrv.ini
+        - /etc/php/7.2/fpm/conf.d/30-pdo_sqlsrv.ini
+
+    - name: Add phpvm command to switch PHP versions
+      copy:
+        content: '{{ script }}'
+        dest: /usr/local/bin/phpvm
+        mode: '+x'
+      vars:
+        script: |
+          #!/bin/bash
+
+          case $1 in
+              php56)
+                  sudo update-alternatives --set php /usr/bin/php5.6
+                  exit;
+              ;;
+              php72)
+                  sudo update-alternatives --set php /usr/bin/php7.2
+                  exit;
+              ;;
+          esac
+
+          echo Usage: phpvm \<php-version\> \(Currently support php56, php72\);
+          echo Exapmle: phpvm php56;
+
+    - name: Install Composer
+      shell: |
+        cd /tmp
+
+        EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        ACTUAL_SIGNATURE="$(php -r "echo hash_file('sha384', 'composer-setup.php');")"
+
+        if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
+        then
+            >&2 echo 'ERROR: Invalid installer signature'
+            rm composer-setup.php
+            exit 1
+        fi
+
+        /usr/bin/php composer-setup.php --quiet
+        RESULT=$?
+        rm composer-setup.php
+
+        mv composer.phar /usr/bin/composer
+
+        exit $RESULT
+      args:
+        creates: /usr/bin/composer
+
+    - name: Install Box.phar
+      shell: |
+        cd /tmp
+
+        curl -LSs https://box-project.github.io/box2/installer.php | php
+
+        mv box.phar /usr/bin/box
+
+        RESULT=$?
+
+        exit $RESULT
+      args:
+        creates: /usr/bin/box
+
+    - name: Install Blackfire Agnet
+      apt:
+        name: blackfire-agent
+        state: latest
+
+    - name: Setup Blackfire Agent configuration
+      template:
+        src: '{{ wsl_root }}/templates/blackfire/agent.j2'
+        dest: /etc/blackfire/agent
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start Blackfire Agent service
+      service:
+        name: blackfire-agent
+        state: restarted
+      changed_when: False
+
+    - name: Install Blackfire PHP extension
+      apt:
+        name: blackfire-php
+        state: latest
+    
+    - name: Download cacert.pem file
+      get_url:
+        url: https://curl.haxx.se/ca/cacert.pem
+        dest: "{{ php['cacert_pem_file_path']|default('/etc/php/cacert.pem') }}"
+        force: yes
+      changed_when: False
+
+    - name: Add custom php ini files
+      file:
+        src: '{{ item.src }}'
+        dest: '{{ item.dest }}'
+        state: link
+      with_items: "{{ php['custom_php_ini_files']|default([]) }}"
+
+    - name: Start PHP-FPM servers
+      service:
+        name: '{{ item }}'
+        state: started
+      with_items:
+        - php5.6-fpm
+        - php7.2-fpm
+
+
+# Reference: https://github.com/nodesource/distributions/blob/master/README.md#debinstall
+- name: Install NodeJS
+  hosts: localhost
+  become: yes
+  vars:
+    version: "{{ nodejs['version']|default(12) }}"
+  tasks:
+    - name: Download NodeJS repository setup script
+      get_url:
+        url: 'https://deb.nodesource.com/setup_{{ version }}.x'
+        dest: /tmp/nodejs_setup_{{ version }}.x
+        force: yes
+        mode: '+x'
+      changed_when: False
+
+    - name: Add NodeJS repository
+      shell: '/tmp/nodejs_setup_{{ version }}.x'
+      changed_when: False
+
+    - name: Remove NodeJS repository setup script
+      file:
+        path: '/tmp/nodejs_setup_{{ version }}.x'
+        state: absent
+      changed_when: False
+
+    - name: Install NodeJS
+      apt:
+        name: nodejs
+        state: latest
+
+
+- name: Install Nginx server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install Nginx server package
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Add Custom Nginx configuration
+      file:
+        src: '{{ item.src }}'
+        dest: '{{ item.dest }}'
+        state: link
+      with_items: "{{ nginx['conf_files']|default([]) }}"
+
+    - name: Check Nginx configuration
+      command: '/usr/sbin/nginx -t -c /etc/nginx/nginx.conf'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
+
+    - name: Start Nginx server
+      service:
+        name: nginx
+        state: started
+
+
+- name: Edit sudoers
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Load sudoers from /etc/sudoers.d
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '^#includedir /etc/sudoers\.d'
+        line: '#includedir /etc/sudoers.d'
+
+    - name: Install custom sudoers
+      template:
+        src: '{{ wsl_root }}/templates/sudoers.j2'
+        dest: '/etc/sudoers.d/{{ wsl_username }}'
+        owner: root
+        group: root
+        mode: '0440'
+
+
+- name: Setup SSH Server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Check if we need to Reinstall openssh-server
+      stat: 
+        path: /etc/reinstalled_openssh_server
+      register: reinstall_openssh_server
+    
+    - name: Uninstall openssh-server
+      apt:
+        name: openssh-server
+        state: absent
+      when: reinstall_openssh_server.stat.exists == True
+
+    - name: Reinstall openssh-server
+      apt:
+        name: openssh-server
+        state: latest
+      when: reinstall_openssh_server.stat.exists == False
+
+    - name: Add public keys
+      authorized_key:
+        user: '{{ item.username }}'
+        key: '{{ item.authorized_key }}'
+        state: present
+      with_items: '{{ wsl_ssh_authorized_keys|default([]) }}'
+    
+    - name: Start OpenSSH server
+      service:
+        name: ssh
+        state: started
+    
+    - name: Remember reinstalled openssh-server
+      copy:
+        content: 1
+        dest: /etc/reinstalled_openssh_server
+
+
+- name: Clear package caches
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Remove useless packages from the cache
+      apt:
+        autoclean: yes
+
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
