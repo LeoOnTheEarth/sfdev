@@ -1,0 +1,114 @@
+version: '3.7'
+
+services:
+  mysql_master:
+    image: bitnami/mysql:5.7
+    container_name: sfdev_mysql_master
+    ports:
+      - ${MYSQL_MASTER_SERVER_PORT}:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_MASTER_ROOT_PASSWORD}
+      - MYSQL_REPLICATION_MODE=master
+      - MYSQL_REPLICATION_USER=${MYSQL_REPLICATION_USERNAME}
+      - MYSQL_REPLICATION_PASSWORD=${MYSQL_REPLICATION_PASSWORD}
+    volumes:
+      - ${MYSQL_MASTER_CUSTOM_CONFIG}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
+      - type: bind
+        source: ${MYSQL_MASTER_DATA_DIR}
+        target: /bitnami/mysql/data
+      - type: bind
+        source: ${MYSQL_MASTER_LOG_DIR}
+        target: /opt/bitnami/mysql/logs
+    networks:
+      - backend
+
+  mysql_slave:
+    image: bitnami/mysql:5.7
+    container_name: sfdev_mysql_slave
+    ports:
+      - ${MYSQL_SLAVE_SERVER_PORT}:3306
+    depends_on:
+      - mysql_master
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_SLAVE_ROOT_PASSWORD}
+      - MYSQL_REPLICATION_MODE=slave
+      - MYSQL_REPLICATION_USER=${MYSQL_REPLICATION_USERNAME}
+      - MYSQL_REPLICATION_PASSWORD=${MYSQL_REPLICATION_PASSWORD}
+      - MYSQL_MASTER_HOST=sfdev_mysql_master
+      - MYSQL_MASTER_PORT_NUMBER=3306
+      - MYSQL_MASTER_ROOT_PASSWORD=${MYSQL_MASTER_ROOT_PASSWORD}
+    volumes:
+      - ${MYSQL_SLAVE_CUSTOM_CONFIG}:/opt/bitnami/mysql/conf/my_custom.cnf:ro
+      - type: bind
+        source: ${MYSQL_SLAVE_DATA_DIR}
+        target: /bitnami/mysql/data
+      - type: bind
+        source: ${MYSQL_SLAVE_LOG_DIR}
+        target: /opt/bitnami/mysql/logs
+    networks:
+      - backend
+
+  memcached:
+    image: memcached:alpine
+    container_name: sfdev_memcached
+    command: 'memcached -m 256'
+    ports:
+      - 11211:11211
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    container_name: sfdev_redis
+    ports:
+      - 6379:6379
+    networks:
+      - backend
+
+  elasticsearch_master:
+    image: leoontheearth/sfdock:elasticsearch55
+    container_name: sfdev_elasticsearch_master
+    environment:
+      - 'cluster.name=elasticsearch_cluster'
+      - 'bootstrap.memory_lock=true'
+      - 'http.cors.enabled=true'
+      - 'http.cors.allow-origin=*'
+      - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: ${ELASTICSEARCH_MASTER_DATA_PATH}
+        target: /usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - backend
+
+  elasticsearch_slave:
+    image: leoontheearth/sfdock:elasticsearch55
+    container_name: sfdev_elasticsearch_slave
+    environment:
+      - 'cluster.name=elasticsearch_cluster'
+      - 'bootstrap.memory_lock=true'
+      - 'http.cors.enabled=true'
+      - 'http.cors.allow-origin=*'
+      - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
+      - 'discovery.zen.ping.unicast.hosts=sfdev_elasticsearch_master'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: ${ELASTICSEARCH_SLAVE_DATA_PATH}
+        target: /usr/share/elasticsearch/data
+    networks:
+      - backend
+    depends_on:
+      - elasticsearch_master
+
+networks:
+  backend:
