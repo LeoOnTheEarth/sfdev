@@ -408,7 +408,7 @@
       apt:
         name: openssh-server
         state: absent
-      when: reinstall_openssh_server.stat.exists == True
+      when: reinstall_openssh_server.stat.exists == False
 
     - name: Reinstall openssh-server
       apt:
