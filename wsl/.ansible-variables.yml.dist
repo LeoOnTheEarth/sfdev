@@ -1,0 +1,35 @@
+---
+# blackfire:
+#   server_id: <add your server id>
+#   server_token: <add your server token>
+
+# nginx:
+#   conf_files: 
+#    - src: /mnt/c/path/to/sfdev/.custom/nginx/sfdev.conf
+#       dest: /etc/nginx/conf.d/sfdev.conf
+
+nodejs: 
+  version": 12
+
+php:
+  cacert_pem_file_path: /mnt/c/path/to/sfdev/.custom/cacert.pem
+  custom_php_ini_files:
+    - src: /mnt/c/path/to/sfdev/.custom/php56-custom.ini
+      dest: /etc/php/5.6/cli/conf.d/zz-custom.ini
+    
+    - src: /mnt/c/path/to/sfdev/.custom/php56-custom.ini
+      dest: /etc/php/5.6/fpm/conf.d/zz-custom.ini
+
+    - src: /mnt/c/path/to/sfdev/.custom/php72-custom.ini
+      dest: /etc/php/7.2/cli/conf.d/zz-custom.ini
+
+    - src: /mnt/c/path/to/sfdev/.custom/php72-custom.ini
+      dest: /etc/php/7.2/fpm/conf.d/zz-custom.ini
+        
+wsl_root: /mnt/c/path/to/sfdev/wsl
+
+# wsl_ssh_authorized_keys:
+#   - username: <your wsl username>
+#     authorized_key: '<your ssh public key>'
+
+wsl_username: <your wsl username>

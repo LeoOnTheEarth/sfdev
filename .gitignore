@@ -1,3 +1,3 @@
 /docker/.env
-/wsl/.ansible-variables.json
+/wsl/.ansible-variables.yml
 /wsl/install.retry
