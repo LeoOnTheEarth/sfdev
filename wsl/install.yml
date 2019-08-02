@@ -311,10 +311,11 @@
     - name: Start PHP-FPM servers
       service:
         name: '{{ item }}'
-        state: started
+        state: restarted
       with_items:
         - php5.6-fpm
         - php7.2-fpm
+      changed_when: False
 
 
 # Reference: https://github.com/nodesource/distributions/blob/master/README.md#debinstall
@@ -373,7 +374,8 @@
     - name: Start Nginx server
       service:
         name: nginx
-        state: started
+        state: restarted
+      changed_when: False
 
 
 - name: Setup SSH Server
@@ -415,7 +417,8 @@
     - name: Start OpenSSH server
       service:
         name: ssh
-        state: started
+        state: restarted
+      changed_when: False
     
     - name: Remember reinstalled openssh-server
       copy:
