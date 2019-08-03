@@ -6,6 +6,13 @@ SETLOCAL ENABLEDELAYEDEXPANSION
   FOR %%A IN (%*) DO (
     CALL :GET_DRIVE %%A ARGUMENT
 
+    IF EXIST %%A (
+      SET FILEPATH=!ARGUMENT:~0,4!
+      IF NOT !FILEPATH! == /mnt (
+        CALL :GET_DRIVE %CD%\%%A ARGUMENT
+      )
+    )
+
     SET ARGV=!ARGV! !ARGUMENT!
   )
 
