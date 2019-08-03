@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" mysql %*
+"%~dp0wsl-wrapper.bat" mysql %*

@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" mysqldump %*
+"%~dp0wsl-wrapper.bat" mysqldump %*

@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" dos2unix %*
+"%~dp0wsl-wrapper.bat" dos2unix %*

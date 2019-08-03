@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" box %*
+"%~dp0wsl-wrapper.bat" box %*

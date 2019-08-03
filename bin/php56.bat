@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" php5.6 %*
+"%~dp0wsl-wrapper.bat" php5.6 %*

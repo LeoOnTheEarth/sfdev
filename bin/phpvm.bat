@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" phpvm %*
+"%~dp0wsl-wrapper.bat" phpvm %*

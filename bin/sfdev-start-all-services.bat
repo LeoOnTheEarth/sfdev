@@ -15,6 +15,6 @@ ECHO.
 ECHO.
 ECHO.
 
-c:\WINDOWS\system32\cmd.exe /C "%BIN_DIR%\wsl.bat" sudo %WSL_DIR%\scripts\service.sh restart
+c:\WINDOWS\system32\cmd.exe /C "%BIN_DIR%\wsl-wrapper.bat" sudo %WSL_DIR%\scripts\service.sh restart
 
 cd %CURRENT_WORKING_DIR%

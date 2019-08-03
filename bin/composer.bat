@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" composer %*
+"%~dp0wsl-wrapper.bat" composer %*

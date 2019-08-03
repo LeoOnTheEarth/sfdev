@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" node %*
+"%~dp0wsl-wrapper.bat" node %*

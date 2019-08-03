@@ -1,3 +1,3 @@
 @ECHO OFF
 
-"%~dp0wsl.bat" npm %*
+"%~dp0wsl-wrapper.bat" npm %*
