@@ -1,3 +1,4 @@
 /docker/.env
 /wsl/.ansible-variables.yml
 /wsl/install.retry
+/bin/import-hosts.conf
