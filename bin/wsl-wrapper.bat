@@ -3,30 +3,44 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 
   SET ARGV=
+  SET DEBUG=0
   FOR %%A IN (%*) DO (
     CALL :GET_DRIVE %%A ARGUMENT
 
     IF EXIST %%A (
-      SET FILEPATH=!ARGUMENT:~0,4!
-      IF NOT !FILEPATH! == /mnt (
+      SET FILEPATH=!ARGUMENT:~0,5!
+      IF NOT !FILEPATH! == /mnt/ (
         CALL :GET_DRIVE %CD%\%%A ARGUMENT
       )
     )
 
-    SET ARGV=!ARGV! !ARGUMENT!
+    IF !ARGUMENT!==--wsl-debug (
+      SET DEBUG=1
+    ) ELSE (
+      FOR /f "tokens=2" %%a IN ("!ARGUMENT!") DO SET ARGUMENT=\"!ARGUMENT!\"
+
+      SET ARGV=!ARGV! !ARGUMENT!
+    )
   )
 
-  ECHO "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\ubuntu1804.exe" run!ARGV!
-  ECHO.
+  IF !DEBUG!==1 (
+    ECHO "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\ubuntu1804.exe" run "!ARGV!"
+    ECHO.
+  )
 
-  "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\ubuntu1804.exe" run!ARGV!
+  "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\ubuntu1804.exe" run "!ARGV!"
+
+  IF !DEBUG!==1 (
+    ECHO.
+    PAUSE
+  )
 
 ENDLOCAL
 
 EXIT /B %ERRORLEVEL%
 
 :GET_DRIVE
-SETLOCAL
+SETLOCAL ENABLEDELAYEDEXPANSION
   SET ARGUMENT=%~1
   SET DRIVE=%ARGUMENT:~0,2%
   SET WSL_DRIVE=
@@ -86,12 +100,11 @@ SETLOCAL
   IF %DRIVE%==z: SET WSL_DRIVE=z
 
   IF NOT "!WSL_DRIVE!"=="" (
-    SET "ARGUMENT=!ARGUMENT:~2!"
-    SET "ARGUMENT=!ARGUMENT:\=/!"
-    SET "ARGUMENT=/mnt/!WSL_DRIVE!!ARGUMENT!"
+    SET ARGUMENT=!ARGUMENT:~2!
+    SET ARGUMENT=!ARGUMENT:\=/!
+    SET ARGUMENT=/mnt/!WSL_DRIVE!!ARGUMENT!
   )
 
-( ENDLOCAL
-  SET %~2=%ARGUMENT%
-)
+ENDLOCAL & SET %~2=%ARGUMENT%
+
 GOTO:EOF
