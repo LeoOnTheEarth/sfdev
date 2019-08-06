@@ -1,16 +1,17 @@
+#!/usr/bin/php
 <?php
 
-$configFilePath = __DIR__.'/import-hosts.conf';
+$configFilePath = __DIR__.'/../.wsl-variables.json';
 
 if (!file_exists($configFilePath)) {
-    echo '[ERROR] import-host.conf file is not exists!';
+    echo '[ERROR] .wsl-variables.json file is not exists!'."\n";
     exit;
 }
 
-$config = parse_ini_file($configFilePath);
+$allConfig = json_decode(file_get_contents($configFilePath), true);
 
-if (empty($config['FILE_LOCATION'])) {
-    echo '[ERROR] FILE_LOCATION is not setup!';
+if (empty($allConfig['import_hosts'])) {
+    echo '[ERROR] "import_hosts" is not setup!'."\n";
     exit;
 }
 
@@ -22,8 +23,9 @@ if (!file_exists($output)) {
     exit;
 }
 
-$input = $config['FILE_LOCATION'];
-$blockName = empty($config['BLOCK_NAME']) ? 'default' : $config['BLOCK_NAME'];
+$config = $allConfig['import_hosts'];
+$input = $config['location'];
+$blockName = empty($config['block_name']) ? 'default' : $config['block_name'];
 
 if (preg_match('/^http/', $input)) {
     $ch = curl_init();

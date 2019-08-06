@@ -28,4 +28,10 @@ IF '%errorlevel%' NEQ '0' (
 
 REM --> Write your scripts below
 
-"%~dp0php.bat" "%~dp0import-hosts.php"
+SET SCRIPT_DIRECTRY=%~dp0
+FOR %%X IN ("%SCRIPT_DIRECTRY%.") DO SET SFDEV_DIR=%%~dpX
+SET SFDEV_DIR=%SFDEV_DIR:~0,-1%
+
+C:\WINDOWS\system32\cmd.exe /C %~dp0php.bat %SFDEV_DIR%\wsl\scripts\import-hosts.sh
+
+PAUSE
