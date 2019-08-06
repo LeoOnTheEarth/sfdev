@@ -94,15 +94,18 @@ usage () {
 case ${ACTION} in
   start)
     run "start" ${SERVICE}
+    run "status" ${SERVICE}
     ;;
 
   stop)
     run "stop" ${SERVICE}
+    run "status" ${SERVICE}
     ;;
 
   restart)
     run "stop" ${SERVICE}
     run "start" ${SERVICE}
+    run "status" ${SERVICE}
     ;;
 
   status)
