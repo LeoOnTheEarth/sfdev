@@ -17,4 +17,4 @@ then
   sudo pip3 install ansible
 fi;
 
-ansible-playbook "${SCRIPT_DIR}/install.yml" -K -v --extra-vars "@${SCRIPT_DIR}/.ansible-variables.yml"
+ansible-playbook "${SCRIPT_DIR}/install.yml" -K -v --extra-vars "@${SCRIPT_DIR}/.wsl-variables.json"
