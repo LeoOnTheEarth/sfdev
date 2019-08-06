@@ -101,7 +101,8 @@ case ${ACTION} in
     ;;
 
   restart)
-    run "restart" ${SERVICE}
+    run "stop" ${SERVICE}
+    run "start" ${SERVICE}
     ;;
 
   status)
