@@ -307,6 +307,19 @@
         dest: '{{ item.dest }}'
         state: link
       with_items: "{{ php['custom_php_ini_files']|default([]) }}"
+    
+    - name: Replace default PHP-FPM configuration
+      copy:
+        src: '{{ item.src }}'
+        dest: '{{ item.dest }}'
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - src: '{{ wsl_root }}/templates/php-fpm/php56-www.conf.j2'
+          dest: '/etc/php/5.6/fpm/pool.d/www.conf'
+        - src: '{{ wsl_root }}/templates/php-fpm/php72-www.conf.j2'
+          dest: '/etc/php/7.2/fpm/pool.d/www.conf'
 
     - name: Start PHP-FPM servers
       service:
@@ -357,6 +370,14 @@
       apt:
         name: nginx
         state: latest
+
+    - name: Replace default Nginx configuration
+      copy:
+        src: '{{ wsl_root }}/templates/nginx/nginx.conf.j2'
+        dest: '/etc/nginx/nginx.conf'
+        owner: root
+        group: root
+        mode: '0644'
 
     - name: Add Custom Nginx configuration
       file:
