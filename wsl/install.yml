@@ -283,7 +283,7 @@
         group: root
         mode: '0644'
 
-    - name: Start Blackfire Agent service
+    - name: Restart Blackfire Agent service
       service:
         name: blackfire-agent
         state: restarted
@@ -321,7 +321,7 @@
         - src: '{{ wsl_root }}/templates/php-fpm/php72-www.conf.j2'
           dest: '/etc/php/7.2/fpm/pool.d/www.conf'
 
-    - name: Start PHP-FPM servers
+    - name: Restart PHP-FPM servers
       service:
         name: '{{ item }}'
         state: restarted
@@ -401,7 +401,7 @@
       changed_when: 'result.rc != 0'
       failed_when: 'result.rc != 0'
 
-    - name: Start Nginx server
+    - name: Retart Nginx server
       service:
         name: nginx
         state: restarted
@@ -444,7 +444,7 @@
         group: root
         mode: '0440'
     
-    - name: Start OpenSSH server
+    - name: Restart OpenSSH server
       service:
         name: ssh
         state: restarted
