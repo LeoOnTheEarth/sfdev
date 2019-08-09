@@ -385,6 +385,15 @@
         dest: '{{ item.dest }}'
         state: link
       with_items: "{{ nginx['conf_files']|default([]) }}"
+    
+    - name: Create Nginx log directories
+      file:
+        path: '{{ item }}'
+        state: directory
+        owner: nginx
+        group: adm
+        mode: '0755'
+      with_items: "{{ nginx['log_directories']|default([]) }}"
 
     - name: Check Nginx configuration
       command: '/usr/sbin/nginx -t -c /etc/nginx/nginx.conf'
