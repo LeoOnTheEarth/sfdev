@@ -66,7 +66,7 @@ services:
       - backend
 
   elasticsearch_master:
-    image: leoontheearth/sfdock:elasticsearch55
+    image: leoontheearth/elasticsearch:5.5
     container_name: sfdev_elasticsearch_master
     environment:
       - 'cluster.name=elasticsearch_cluster'
@@ -88,7 +88,7 @@ services:
       - backend
 
   elasticsearch_slave:
-    image: leoontheearth/sfdock:elasticsearch55
+    image: leoontheearth/elasticsearch:5.5
     container_name: sfdev_elasticsearch_slave
     environment:
       - 'cluster.name=elasticsearch_cluster'
