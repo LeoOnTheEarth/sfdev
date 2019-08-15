@@ -165,6 +165,13 @@
         dest: /usr/local/bin/php72
         state: link
 
+    - name: Install msodbcsql17 package
+      apt:
+        name: msodbcsql17
+        state: latest
+      environment:
+        ACCEPT_EULA: Y
+
     - name: Install unixodbc-dev package
       apt:
         name: unixodbc-dev
