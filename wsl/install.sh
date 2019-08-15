@@ -7,6 +7,11 @@ then
   cp -f "${SCRIPT_DIR}/ansible.cfg" ~/.ansible.cfg
 fi;
 
+if [ ! -f /etc/wsl.conf ]
+then
+  sudo cp -f "${SCRIPT_DIR}/templates/wsl.conf" /etc/wsl.conf
+fi;
+
 # Install Ansible
 if [ ! -f /usr/local/bin/ansible ]
 then
