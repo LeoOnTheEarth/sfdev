@@ -23,7 +23,7 @@ First, open Windows Command Prompt (a.k.a. `cmd.exe`)
 2. Enter WSL mode, and install Ubuntu packages  
 
     ```bash
-    C:\> wsl.exe
+    C:\> wsl
     ```
 
     Then, execute `install.sh` script  
@@ -32,13 +32,8 @@ First, open Windows Command Prompt (a.k.a. `cmd.exe`)
     $ /mnt/c/sfdev/wsl/install.sh
     ```
 
-4. Add `C:\sfdev\bin` into your Windows `$PATH` environment.
-
-5. Execute command to start all services  
+3. Execute command to start all services  
 
     ```bash
-    C:\> C:\sfdev\bin\sfdev-start-all-services.bat
-
-    # Or Just execute sfdev-start-all-services
-    C:\> sfdev-start-all-services
+    C:\> C:\sfdev\bin\sfdev-service.bat restart
     ```
