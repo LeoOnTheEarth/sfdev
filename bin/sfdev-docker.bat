@@ -6,8 +6,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
   SET SFDEV_DIR=%SFDEV_DIR:~0,-1%
   SET SFDEV_DOCKER_DIR=%SFDEV_DIR%\docker
   SET CURRENT_WORKING_DIR=%CD%
-
-  CD %SFDEV_DOCKER_DIR%
+  SET DOCKER_COMPOSE_COMMAND=docker-compose --project-directory "%SFDEV_DOCKER_DIR%" -f "%SFDEV_DOCKER_DIR%\docker-compose.yml"
 
   ::Get service name list
   SET COUNT=0
@@ -25,36 +24,36 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
   IF "!ACTION!"=="start" (
   	IF [!SERVICES!]==[] (
-      docker-compose -f docker-compose.yml up -d
+      %DOCKER_COMPOSE_COMMAND% up -d
     ) ELSE (
-      docker-compose -f docker-compose.yml start !SERVICES!
+      %DOCKER_COMPOSE_COMMAND% start !SERVICES!
     )
 
     ECHO.
     ECHO.
-    docker-compose -f docker-compose.yml ps
+    %DOCKER_COMPOSE_COMMAND% ps
 
     GOTO :END
   ) ELSE IF "!ACTION!"=="stop" (
     IF [!SERVICES!]==[] (
-      docker-compose -f docker-compose.yml down
+      %DOCKER_COMPOSE_COMMAND% down
       docker system prune -f
       docker volume prune -f
       docker system df
     ) ELSE (
-      docker-compose -f docker-compose.yml stop !SERVICES!
+      %DOCKER_COMPOSE_COMMAND% stop !SERVICES!
     )
     
     ECHO.
     ECHO.
-    docker-compose -f docker-compose.yml ps
+    %DOCKER_COMPOSE_COMMAND% ps
 
     GOTO :END
   ) ELSE IF "!ACTION!"=="restart" (
   	IF [!SERVICES!]==[] (
       :loop
       ping 127.0.0.1 -n 2 > nul
-      docker-compose ps
+      %DOCKER_COMPOSE_COMMAND% ps
       IF !errorlevel! GTR 0 (
         ECHO Waiting for docker service start...
         GOTO loop
@@ -63,7 +62,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
       ECHO.
       ECHO.
 
-      docker-compose -f docker-compose.yml down
+      %DOCKER_COMPOSE_COMMAND% down
       ECHO.
       docker system prune -f
       ECHO.
@@ -72,21 +71,21 @@ SETLOCAL ENABLEDELAYEDEXPANSION
       docker system df
       ECHO.
 
-      docker-compose -f docker-compose.yml up -d
+      %DOCKER_COMPOSE_COMMAND% up -d
     ) ELSE (
-      docker-compose -f docker-compose.yml restart !SERVICES!
+      %DOCKER_COMPOSE_COMMAND% restart !SERVICES!
     )
     
     ECHO.
     ECHO.
-    docker-compose -f docker-compose.yml ps
+    %DOCKER_COMPOSE_COMMAND% ps
 
     GOTO :END
   ) ELSE IF "!ACTION!"=="status" (
-    docker-compose -f docker-compose.yml ps
+    %DOCKER_COMPOSE_COMMAND% ps
     GOTO :END
   ) ELSE IF "!ACTION!"=="logs" (
-    docker-compose -f docker-compose.yml logs
+    %DOCKER_COMPOSE_COMMAND% logs
     GOTO :END
   ) ELSE (
     GOTO :HELP
