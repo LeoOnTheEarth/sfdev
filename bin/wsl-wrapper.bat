@@ -1,8 +1,8 @@
 @ECHO OFF
 
 SET WSL_COMMAND="%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\ubuntu1804.exe" run
-SET WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND=%~dp0wsl-wrapper-argument-converter.exe "%CD%" %*
-SET WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND_TEMP=%TEMP%\wsl_console_argument_converter_command_%RANDOM%.txt
+SET WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND="%~dp0wsl-wrapper-argument-converter.exe" "%CD%" %*
+SET WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND_TEMP="%TEMP%\wsl_console_argument_converter_command_%RANDOM%.txt"
 
 %WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND% > %WSL_CONSOLE_ARGUMENT_CONVERTER_COMMAND_TEMP%
 
