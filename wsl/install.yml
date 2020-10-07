@@ -2,22 +2,7 @@
 - name: Add repositories and update packages
   hosts: localhost
   become: yes
-  vars:
-    codename: bionic
   tasks:
-    - name: Add Nginx Apt signing key
-      apt_key:
-        url: https://nginx.org/keys/nginx_signing.key
-        state: present
-
-    - name: Add Nginx repositories
-      apt_repository:
-        repo: '{{ item }}'
-        state: present
-      with_items:
-        - 'deb https://nginx.org/packages/ubuntu/ {{ codename }} nginx'
-        - 'deb-src https://nginx.org/packages/ubuntu/ {{ codename }} nginx'
-
     - name: Add Blackfire Apt signing key
       apt_key:
         url: https://packages.blackfire.io/gpg.key
@@ -40,7 +25,7 @@
 
     - name: Add Microsoft package resource list for APT
       get_url:
-        url: https://packages.microsoft.com/config/ubuntu/18.04/prod.list
+        url: 'https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/prod.list'
         dest: /etc/apt/sources.list.d/mssql-release.list
         force: yes
       changed_when: False
@@ -54,6 +39,8 @@
       apt:
         upgrade: dist
         state: latest
+      environment:
+        ACCEPT_EULA: 'y'
 
 
 - name: Install basic packages
@@ -291,10 +278,10 @@
         mode: '0644'
 
     - name: Restart Blackfire Agent service
-      service:
-        name: blackfire-agent
-        state: restarted
-      changed_when: False
+      command: '/etc/init.d/blackfire-agent restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
 
     - name: Install Blackfire PHP extension
       apt:
@@ -316,7 +303,7 @@
       with_items: "{{ php['custom_php_ini_files']|default([]) }}"
     
     - name: Replace default PHP-FPM configuration
-      copy:
+      template:
         src: '{{ item.src }}'
         dest: '{{ item.dest }}'
         owner: root
@@ -328,15 +315,17 @@
         - src: '{{ wsl_root }}/templates/php-fpm/php72-www.conf.j2'
           dest: '/etc/php/7.2/fpm/pool.d/www.conf'
 
-    - name: Restart PHP-FPM servers
-      service:
-        name: '{{ item }}'
-        state: restarted
-      with_items:
-        - php5.6-fpm
-        - php7.2-fpm
-      changed_when: False
+    - name: Restart PHP-FPM 5.6 service
+      command: '/etc/init.d/php5.6-fpm restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
 
+    - name: Restart PHP-FPM 7.2 service
+      command: '/etc/init.d/php7.2-fpm restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
 
 # Reference: https://github.com/nodesource/distributions/blob/master/README.md#debinstall
 - name: Install NodeJS
@@ -368,16 +357,96 @@
         name: nodejs
         state: latest
 
+- name: Install NGINX from source
+  hosts: localhost
+  become: yes
+  vars:
+    nginx_version: nginx-1.16.1
+    nginx_tarball_url: 'http://nginx.org/download/{{ nginx_version }}.tar.gz'
+    nginx_tarball_download_dir: '/usr/local/src/nginx'
+    nginx_tarball_source_dir: '{{ nginx_tarball_download_dir }}/{{ nginx_version }}'
+  tasks:
+    - name: Remove NGINX from apt repository
+      apt:
+        name: nginx
+        state: absent
 
-- name: Install Nginx server
+    - name: Add NGINX user
+      user:
+        name: nginx
+        create_home: no
+        system: yes
+
+    - name: Installing NGINX Dependencies
+      apt:
+        name:
+          - libssl-dev
+          - zlib1g-dev
+          - libpcre3
+          - libpcre3-dev
+          - unzip
+        update_cache: yes
+
+    - name: Creating Nginx download directory
+      file:
+        path: '{{ nginx_tarball_download_dir }}'
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Downloading NGINX sources
+      get_url:
+        url: '{{ nginx_tarball_url }}'
+        dest: '{{ nginx_tarball_download_dir }}/{{ nginx_version }}.tar.gz'
+      register: nginx_source
+
+    - name: Unpacking NGINX
+      unarchive:
+        copy: no
+        dest: '{{ nginx_tarball_download_dir }}'
+        src: '{{ nginx_source.dest }}'
+        owner: root
+        group: root
+      when: nginx_source.changed
+      register: nginx_source_unpacked
+
+    - name: Creating required Nginx directory
+      file:
+        path: /etc/nginx/conf.d
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Creating required Nginx cache directory
+      file:
+        path: /var/cache/nginx
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Compiling Nginx source
+      command: '{{ wsl_root }}/scripts/compile-nginx.sh {{ nginx_tarball_source_dir }}'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
+      when: nginx_source_unpacked.changed
+
+    - name: Installing NGINX init script (service)
+      copy:
+        src: '{{ wsl_root }}/templates/init.d/nginx'
+        dest: /etc/init.d/nginx
+        owner: root
+        group: root
+        mode: 0755
+      when: nginx_source_unpacked.changed
+
+- name: Setup Nginx server
   hosts: localhost
   become: yes
   tasks:
-    - name: Install Nginx server package
-      apt:
-        name: nginx
-        state: latest
-
     - name: Replace main Nginx configuration
       copy:
         src: '{{ wsl_root }}/templates/nginx/nginx.conf.j2'
@@ -413,11 +482,11 @@
       changed_when: 'result.rc != 0'
       failed_when: 'result.rc != 0'
 
-    - name: Retart Nginx server
-      service:
-        name: nginx
-        state: restarted
-      changed_when: False
+    - name: Restart Nginx service
+      command: '/etc/init.d/nginx restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
 
 
 - name: Setup SSH Server
@@ -455,13 +524,13 @@
         owner: root
         group: root
         mode: '0440'
-    
-    - name: Restart OpenSSH server
-      service:
-        name: ssh
-        state: restarted
-      changed_when: False
-    
+
+    - name: Restart OpenSSH service
+      command: '/etc/init.d/ssh restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
+
     - name: Remember reinstalled openssh-server
       copy:
         content: 1
