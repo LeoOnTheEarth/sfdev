@@ -20,8 +20,8 @@
 ; Unix user/group of processes
 ; Note: The user is mandatory. If the group is not set, the default user's group
 ;       will be used.
-user = www-data
-group = www-data
+user = {{ wsl_username|default('www-data') }}
+group = {{ wsl_username|default('www-data') }}
 
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
@@ -302,6 +302,7 @@ pm.max_spare_servers = 3
 ;  %r: the request URI (without the query string, see %q and %Q)
 ;  %R: remote IP address
 ;  %s: status (response code)
+{% raw %}
 ;  %t: server time the request was received
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
@@ -313,6 +314,7 @@ pm.max_spare_servers = 3
 ;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %u: remote user
+{% endraw %}
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
