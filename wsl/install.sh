@@ -17,7 +17,8 @@ if [ ! -f /usr/local/bin/ansible ]
 then
   sudo apt update
   sudo apt upgrade -y
-  # For install Ansible
+
+  # Installing Ansible
   sudo apt install -y python3-pip
   sudo pip3 install ansible
 fi;
