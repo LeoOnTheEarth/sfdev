@@ -1,13 +1,11 @@
-PHP Develop Environment with WSL and Docker
-===========================================
+PHP Develop Environment with WSL
+================================
 
 ## Pre-Requirements
 
 1. Install Windows Subsystem for Linux (WSL)
 2. Go to **Microsoft Store**, install **Ubuntu 18.04 LTS** distribution.
 3. Launch **Ubuntu 18.04 LTS** and setup your username and password
-4. Install Hyper-V
-5. Install **[Docker Desktop](https://hub.docker.com/editions/community/docker-ce-desktop-windows)**
 
 ## Installation
 
