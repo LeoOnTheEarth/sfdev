@@ -489,6 +489,43 @@
       failed_when: 'result.rc != 0'
 
 
+- name: Install Memcached Server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install Memcached
+      apt:
+        name: memcached
+        state: latest
+    - name: Replace original configuration
+      template:
+        src: '{{ wsl_root }}/templates/memcached/memcached.conf.j2'
+        dest: '/etc/memcached.conf'
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Restart Memcached server
+      command: '/etc/init.d/memcached restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
+
+
+- name: Install Redis Server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install Redis
+      apt:
+        name: redis-server
+        state: latest
+    - name: Restart Redis server
+      command: '/etc/init.d/redis-server restart'
+      register: result
+      changed_when: 'result.rc != 0'
+      failed_when: 'result.rc != 0'
+
+
 - name: Setup SSH Server
   hosts: localhost
   become: yes
